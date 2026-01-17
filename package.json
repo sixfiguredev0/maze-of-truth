@@ -1,0 +1,42 @@
+{
+  "name": "media-literacy-escape-room-3d",
+  "version": "1.0.0",
+  "description": "3D isometric educational game for media literacy in Bulgarian",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://sixfiguredev0:ghs_Cj2wwZa4CnIFbOZJeC7uGUggMashUa1BiLUi@github.com/sixfiguredev0/maze-of-truth.git"
+  },
+  "keywords": ["3d", "education", "media-literacy", "bulgarian", "escape-room", "react", "threejs"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/sixfiguredev0/maze-of-truth/issues"
+  },
+  "homepage": "https://github.com/sixfiguredev0/maze-of-truth#readme",
+  "devDependencies": {
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
+    "autoprefixer": "^10.4.23",
+    "lucide-react": "^0.562.0",
+    "postcss": "^8.5.6",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^3.4.19",
+    "three": "^0.182.0",
+    "zustand": "^5.0.10"
+  }
+}
