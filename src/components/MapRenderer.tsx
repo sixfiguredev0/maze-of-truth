@@ -6,9 +6,10 @@ import * as THREE from 'three';
 interface MapRendererProps {
   grid: number[][];
   theme: 'newsroom' | 'server' | 'ailab';
+  questions: { id: string; position: { x: number; z: number } }[];
 }
 
-const MapRenderer: React.FC<MapRendererProps> = ({ grid, theme }) => {
+const MapRenderer: React.FC<MapRendererProps> = ({ grid, theme, questions }) => {
   // Theme colors and properties
   const getThemeColors = () => {
     switch (theme) {
@@ -81,9 +82,6 @@ const MapRenderer: React.FC<MapRendererProps> = ({ grid, theme }) => {
           </Plane>
         );
       
-      case 3: // Question Node
-        return <QuestionNode key={`question-${x}-${z}`} position={[worldX, 1, worldZ]} />;
-      
       case 4: // Exit Door
         return (
           <Box
@@ -116,6 +114,12 @@ const MapRenderer: React.FC<MapRendererProps> = ({ grid, theme }) => {
       {grid.map((row, x) =>
         row.map((cellValue, z) => renderCell(cellValue, x, z))
       )}
+      {questions.map((question) => (
+        <QuestionNode
+          key={question.id}
+          position={[question.position.x, 1, question.position.z]}
+        />
+      ))}
     </group>
   );
 };
