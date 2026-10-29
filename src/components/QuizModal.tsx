@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { useGameStore } from '../store/useGameStore';
+import { levels } from '../data/levels';
 
 const QuizModal: React.FC = () => {
   const { 
@@ -12,49 +13,31 @@ const QuizModal: React.FC = () => {
     markQuestionSolved 
   } = useGameStore();
 
-  // Import levels data to get current question
-  const [currentQuestion, setCurrentQuestion] = React.useState<any>(null);
+  const currentQuestion = React.useMemo(
+    () => levels[currentLevel].questions.find((question) => !solvedQuestions.has(question.id)) ?? null,
+    [currentLevel, solvedQuestions]
+  );
   const [selectedAnswer, setSelectedAnswer] = React.useState<number | null>(null);
   const [showResult, setShowResult] = React.useState(false);
   const [isCorrect, setIsCorrect] = React.useState(false);
   const [isShaking, setIsShaking] = React.useState(false);
 
-  React.useEffect(() => {
-    if (gameState === 'quiz') {
-      // Get current level questions
-      import('../data/levels').then(({ levels }) => {
-        const level = levels[currentLevel];
-        if (level && level.questions.length > 0) {
-          // Find first unsolved question
-          const unsolvedQuestion = level.questions.find(
-            (q: any) => !solvedQuestions.has(q.id)
-          );
-          if (unsolvedQuestion) {
-            setCurrentQuestion(unsolvedQuestion);
-          }
-        }
-      });
-    }
-  }, [gameState, currentLevel, solvedQuestions]);
-
   const handleAnswerSelect = (answerIndex: number) => {
-    if (showResult) return;
+    if (showResult || !currentQuestion) return;
+    const question = currentQuestion;
     
     setSelectedAnswer(answerIndex);
-    const isAnswerCorrect = currentQuestion.options[answerIndex].correct;
+    const isAnswerCorrect = question.options[answerIndex].correct;
     setIsCorrect(isAnswerCorrect);
     setShowResult(true);
 
     if (isAnswerCorrect) {
       // Correct answer
       setTimeout(() => {
-        if (currentQuestion) {
-          markQuestionSolved(currentQuestion.id);
-          addScore(10);
-        }
+        markQuestionSolved(question.id);
+        addScore(10);
         setShowResult(false);
         setSelectedAnswer(null);
-        setCurrentQuestion(null);
         setGameState('playing');
       }, 2000);
     } else {
@@ -71,7 +54,6 @@ const QuizModal: React.FC = () => {
   const handleClose = () => {
     if (!showResult) {
       setGameState('playing');
-      setCurrentQuestion(null);
       setSelectedAnswer(null);
       setShowResult(false);
     }
@@ -89,7 +71,7 @@ const QuizModal: React.FC = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Въпрос {currentLevel}
+            Проверка {levels[currentLevel].questions.findIndex((q) => q.id === currentQuestion.id) + 1} от {levels[currentLevel].questions.length}
           </h2>
           {!showResult && (
             <button
@@ -130,6 +112,7 @@ const QuizModal: React.FC = () => {
                 key={index}
                 onClick={() => handleAnswerSelect(index)}
                 disabled={showResult}
+                aria-label={`Отговор ${index + 1}: ${option.text}`}
                 className={buttonClass}
               >
                 {option.text}

@@ -64,7 +64,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ 
           currentLevel: levelNumber,
           currentGrid: level.grid,
-          gameState: 'playing'
+          gameState: 'playing',
+          solvedQuestions: new Set(),
+          playerPosition: null
         });
         // Initialize player position for the new level
         get().initializePlayerPosition(level.grid);

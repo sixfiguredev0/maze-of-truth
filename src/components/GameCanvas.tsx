@@ -4,6 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import MapRenderer from './MapRenderer';
 import Player from './Player';
 import { useGameStore } from '../store/useGameStore';
+import { levels } from '../data/levels';
 
 const GameCanvas: React.FC = () => {
   const { currentLevel, currentGrid } = useGameStore();
@@ -79,7 +80,11 @@ const GameCanvas: React.FC = () => {
         />
         
         {/* Game Objects */}
-        <MapRenderer grid={currentGrid} theme={currentLevel === 1 ? 'newsroom' : currentLevel === 2 ? 'server' : 'ailab'} />
+        <MapRenderer
+          grid={currentGrid}
+          theme={levels[currentLevel].theme}
+          questions={levels[currentLevel].questions}
+        />
         <Player />
         
         {/* Grid helper for development */}

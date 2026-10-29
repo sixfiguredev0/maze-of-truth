@@ -1,8 +1,9 @@
 import React from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Billboard, Text } from '@react-three/drei';
+import { Billboard } from '@react-three/drei';
 import { useGameStore } from '../store/useGameStore';
 import * as THREE from 'three';
+import { levels } from '../data/levels';
 
 const Player: React.FC = () => {
   const { 
@@ -39,32 +40,35 @@ const Player: React.FC = () => {
     };
   }, []);
 
-  // Check proximity to questions
-  React.useEffect(() => {
-    if (!playerPosition || gameState !== 'playing') return;
+  const nearbyQuestion = React.useMemo(() => {
+    if (!playerPosition) return null;
+    return levels[currentLevel].questions.find((question) => {
+      if (solvedQuestions.has(question.id)) return false;
+      const distance = Math.hypot(
+        playerPosition.x - question.position.x,
+        playerPosition.z - question.position.z
+      );
+      return distance < 1.25;
+    }) ?? null;
+  }, [currentLevel, playerPosition, solvedQuestions]);
+  const canExit = playerPosition
+    ? Math.hypot(playerPosition.x - 8, playerPosition.z - 8) < 1.25 &&
+      levels[currentLevel].questions.every((question) => solvedQuestions.has(question.id))
+    : false;
 
-    // Get current level questions
-    import('../data/levels').then(({ levels }) => {
-      const level = levels[currentLevel];
-      if (level && level.questions.length > 0) {
-        // Check distance to each unsolved question
-        level.questions.forEach((question: any) => {
-          if (!solvedQuestions.has(question.id)) {
-            const distance = Math.sqrt(
-              Math.pow(playerPosition.x - question.position.x, 2) + 
-              Math.pow(playerPosition.z - question.position.z, 2)
-            );
-            
-            // Trigger quiz if player is within 1.5 units
-            if (distance < 1.5) {
-              console.log('Player is close to question:', question.id);
-              setGameState('quiz');
-            }
-          }
-        });
+  React.useEffect(() => {
+    const handleInteraction = (event: KeyboardEvent) => {
+      if (event.code !== 'KeyE' || gameState !== 'playing') return;
+      if (nearbyQuestion) {
+        setGameState('quiz');
+      } else if (canExit) {
+        setGameState('won');
       }
-    });
-  }, [playerPosition, gameState, setGameState, solvedQuestions, currentLevel]);
+    };
+
+    window.addEventListener('keydown', handleInteraction);
+    return () => window.removeEventListener('keydown', handleInteraction);
+  }, [canExit, gameState, nearbyQuestion, setGameState]);
 
   useFrame((_, delta) => {
     if (!playerPosition || gameState !== 'playing') return;
@@ -140,22 +144,18 @@ const Player: React.FC = () => {
   if (!playerPosition) return null;
 
   return (
-    <Billboard follow={false} lockX={false} lockY={false} lockZ={false}>
-      <mesh ref={meshRef} position={[playerPosition.x, 0.5, playerPosition.z]}>
+    <>
+      <Billboard follow={false} lockX={false} lockY={false} lockZ={false}>
+        <mesh ref={meshRef} position={[playerPosition.x, 0.5, playerPosition.z]}>
         <capsuleGeometry args={[0.3, 0.6, 4, 8]} />
         <meshLambertMaterial color="#4488ff" />
-      </mesh>
-      {/* Player indicator */}
-      <Text
-        position={[0, 1.2, 0]}
-        fontSize={0.2}
-        color="white"
-        anchorX="center"
-        anchorY="middle"
-      >
-        P
-      </Text>
-    </Billboard>
+        </mesh>
+        <mesh position={[0, 1.05, 0]}>
+          <ringGeometry args={[0.18, 0.24, 16]} />
+          <meshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
+        </mesh>
+      </Billboard>
+    </>
   );
 };
 
